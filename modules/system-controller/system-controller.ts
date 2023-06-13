@@ -1,4 +1,4 @@
-import { Client, Collection, Message, SlashCommandBuilder, Events } from "discord.js";
+import { Client, SlashCommandBuilder, Events } from "discord.js";
 
 import { BotModule } from "../generics";
 import { Env } from "../../main";
@@ -11,10 +11,8 @@ import {
   SUB_COMMAND_HELP,
   SUB_COMMAND_INFO,
 } from "./constants";
-import { ThreadChannel } from "discord.js";
-import { boolean } from "zod";
 
-export class MerinGPT extends BotModule {
+export class SystemController extends BotModule {
   name = "システムコントローラー";
   description = "Bot全般設定用モジュール";
   version = "1.0.0";
