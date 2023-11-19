@@ -57,11 +57,14 @@ export class SystemController extends BotModule {
     this.client.on(Events.InteractionCreate, async (interaction) => {
       // コマンド以外は無視する
       if (!interaction.isChatInputCommand()) return;
+      if (!BASE_COMMAND.includes(interaction.commandName)) return;
 
       const subCommand = interaction.options.getSubcommand();
 
       switch (subCommand) {
         case SUB_COMMAND_HELP: {
+          console.log(this.help());
+
           await interaction.reply({
             content: this.help(),
           });
