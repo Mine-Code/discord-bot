@@ -63,6 +63,8 @@ export class SystemController extends BotModule {
 
       switch (subCommand) {
         case SUB_COMMAND_HELP: {
+          console.log(this.help());
+
           await interaction.reply({
             content: this.help(),
           });
