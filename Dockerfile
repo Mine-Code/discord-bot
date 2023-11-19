@@ -10,13 +10,14 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV=production
 
+COPY package*.json ./
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+    apt-get install -y python-is-python3 pkg-config build-essential ffmpeg
 
 # Install node modules
 COPY --link package-lock.json package.json ./
@@ -32,5 +33,5 @@ FROM base
 COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
-EXPOSE 3000
+EXPOSE 50021
 CMD [ "npm", "run", "start" ]
