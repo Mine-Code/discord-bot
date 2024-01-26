@@ -132,6 +132,22 @@ export class TexRenderer extends BotModule {
             return;
           }
 
+          let count = 0;
+
+          const channel = interaction.channel;
+
+          channel.sendTyping();
+          count++;
+
+          const interval = setInterval(() => {
+            if (count > 10) {
+              clearInterval(interval);
+              return;
+            }
+            channel.sendTyping();
+            count++;
+          }, 5000);
+
           // 数式を描画する(エラー時はエラーを返す)
           try {
             const buffer = await this.renderLatex(text);
@@ -143,9 +159,11 @@ export class TexRenderer extends BotModule {
               content: e.toString(),
               ephemeral: true,
             });
+            clearInterval(interval);
             return;
           }
-
+          
+          clearInterval(interval);
           break;
         }
       }
