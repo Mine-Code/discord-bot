@@ -1,7 +1,7 @@
 {
   "name": "minecode-discord-bot",
   "version": "0.0.1",
-  "main": "man.ts",
+  "main": "main.ts",
   "scripts": {
     "start": "ts-node main.ts"
   },
