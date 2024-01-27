@@ -1,0 +1,11 @@
+[Unit]
+Description=MineCode Discord Bot
+
+[Service]
+User=ubuntu
+ExecStart=/home/ubuntu/app/discord-bot/start.sh
+EnvironmentFile=/home/ubuntu/app/discord-bot/.env
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
