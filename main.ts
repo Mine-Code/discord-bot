@@ -7,6 +7,7 @@ const envSchema = z.object({
   BOT_TOKEN: z.string(),
   BOT_ID: z.string(),
   GUILD_ID: z.string(),
+  OBSERVER_CHANNEL_ID: z.string(),
 });
 
 config();
