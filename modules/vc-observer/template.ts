@@ -10,7 +10,7 @@ export const NOTIFICATION_TEMPLATE = (
   let title: string;
   let description: string;
   let color: number;
-  let name = user.nickname ?? user.displayName;
+  let name = user.displayName;
 
   switch (type) {
     case "join":
@@ -42,7 +42,7 @@ export const NOTIFICATION_TEMPLATE = (
     color,
     timestamp: new Date().toLocaleString(),
     author: {
-      name: user.displayName,
+      name: user.user.username,
       icon_url: user.displayAvatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
     }
   });
