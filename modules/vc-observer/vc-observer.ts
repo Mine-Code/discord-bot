@@ -78,10 +78,9 @@ export class VCObserver extends BotModule {
           embeds: [
             NOTIFICATION_TEMPLATE(
               "join",
-              newState.member?.displayName,
+              newState.member,
               newUserChannel,
               newUserChannel.members.size,
-              newState.member?.user.avatarURL()
             ),
           ],
         });
@@ -95,10 +94,9 @@ export class VCObserver extends BotModule {
           embeds: [
             NOTIFICATION_TEMPLATE(
               "leave",
-              oldState.member?.displayName,
+              oldState.member,
               oldUserChannel,
               oldUserChannel.members.size,
-              oldState.member?.user.avatarURL()
             ),
           ],
         });
@@ -116,10 +114,9 @@ export class VCObserver extends BotModule {
           embeds: [
             NOTIFICATION_TEMPLATE(
               "move",
-              newState.member?.displayName,
+              newState.member,
               newUserChannel,
               newUserChannel.members.size,
-              newState.member?.user.avatarURL()
             ),
           ],
         });

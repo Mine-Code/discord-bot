@@ -1,29 +1,29 @@
-import { EmbedBuilder, VoiceBasedChannel, channelLink } from "discord.js";
+import { EmbedBuilder, GuildMember, VoiceBasedChannel, channelLink } from "discord.js";
 import { USER_IMAGE_NOT_FOUND_URL } from "./constants";
 
 export const NOTIFICATION_TEMPLATE = (
   type: "join" | "leave" | "move",
-  username: string | undefined = "unknown",
+  user: GuildMember,
   channel: VoiceBasedChannel,
   memberCount: number,
-  avatarURL?: string | null
 ) => {
   let title: string;
   let description: string;
   let color: number;
+
   switch (type) {
     case "join":
-      title = "VCに入室しました";
+      title = `${user.nickname} がVCに入室しました`;
       description = `→ <#${channel.id}>`;
       color = 0x08ef74;
       break;
     case "leave":
-      title = "VCから退出しました";
+      title = `${user.nickname} がVCから退出しました`;
       description = `← <#${channel.id}>`;
       color = 0xf10404;
       break;
     case "move":
-      title = "VCを移動しました";
+      title = `${user.nickname} がVCを移動しました`;
       description = `→ <#${channel.id}>`;
       color = 0xf1f104;
       break;
@@ -41,8 +41,8 @@ export const NOTIFICATION_TEMPLATE = (
     color,
     timestamp: new Date().toLocaleString(),
     author: {
-      name: username,
-      icon_url: avatarURL ?? USER_IMAGE_NOT_FOUND_URL,
+      name: user.displayName,
+      icon_url: user.displayAvatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
     }
   });
 };
