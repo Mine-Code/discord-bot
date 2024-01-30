@@ -10,20 +10,21 @@ export const NOTIFICATION_TEMPLATE = (
   let title: string;
   let description: string;
   let color: number;
+  let name = user.nickname ?? user.displayName;
 
   switch (type) {
     case "join":
-      title = `${user.nickname} がVCに入室しました`;
+      title = `${name} がVCに入室しました`;
       description = `→ <#${channel.id}>`;
       color = 0x08ef74;
       break;
     case "leave":
-      title = `${user.nickname} がVCから退出しました`;
+      title = `${name} がVCから退出しました`;
       description = `← <#${channel.id}>`;
       color = 0xf10404;
       break;
     case "move":
-      title = `${user.nickname} がVCを移動しました`;
+      title = `${name} がVCを移動しました`;
       description = `→ <#${channel.id}>`;
       color = 0xf1f104;
       break;
