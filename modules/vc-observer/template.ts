@@ -3,28 +3,30 @@ import { USER_IMAGE_NOT_FOUND_URL } from "./constants";
 
 export const NOTIFICATION_TEMPLATE = (
   type: "join" | "leave" | "move",
-  user: GuildMember,
+  member: GuildMember,
   channel: VoiceBasedChannel,
   memberCount: number,
 ) => {
   let title: string;
   let description: string;
   let color: number;
-  let name = user.displayName;
+  let displayName = member.displayName;
+  let globalName = member.user.globalName;
+  let username = member.user.username;
 
   switch (type) {
     case "join":
-      title = `${name} がVCに入室しました`;
+      title = `${displayName} がVCに入室しました`;
       description = `→ <#${channel.id}>`;
       color = 0x08ef74;
       break;
     case "leave":
-      title = `${name} がVCから退出しました`;
+      title = `${displayName} がVCから退出しました`;
       description = `← <#${channel.id}>`;
       color = 0xf10404;
       break;
     case "move":
-      title = `${name} がVCを移動しました`;
+      title = `${displayName} がVCを移動しました`;
       description = `→ <#${channel.id}>`;
       color = 0xf1f104;
       break;
@@ -42,8 +44,8 @@ export const NOTIFICATION_TEMPLATE = (
     color,
     timestamp: new Date().toLocaleString(),
     author: {
-      name: user.user.username,
-      icon_url: user.displayAvatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
+      name: `${globalName} (${username})`,
+      icon_url: member.displayAvatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
     }
   });
 };
