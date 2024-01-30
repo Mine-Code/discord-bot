@@ -39,7 +39,7 @@ export const NOTIFICATION_TEMPLATE = (
       },
     ],
     color,
-    timestamp: new Date().toLocaleString(), // 多分要らない
+    timestamp: new Date().toLocaleString(),
     author: {
       name: username,
       icon_url: avatarURL ?? USER_IMAGE_NOT_FOUND_URL,
