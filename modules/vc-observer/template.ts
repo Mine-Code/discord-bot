@@ -48,7 +48,7 @@ export const NOTIFICATION_TEMPLATE = (
     timestamp: new Date().toLocaleString(),
     author: {
       name: `${globalName} (${username})`,
-      icon_url: member.avatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
+      icon_url: member.user.avatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
     }
   });
 };
