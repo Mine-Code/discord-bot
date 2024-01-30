@@ -31,6 +31,7 @@ export const NOTIFICATION_TEMPLATE = (
       color = 0xf1f104;
       break;
   }
+  
   return new EmbedBuilder({
     title,
     description,
@@ -41,14 +42,14 @@ export const NOTIFICATION_TEMPLATE = (
         inline: true,
       },
     ],
-    image: {
-      url: member.displayAvatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
+    footer: {
+      text: `${globalName} (${username})`,
     },
     color,
     timestamp: new Date().toLocaleString(),
     author: {
-      name: `${globalName} (${username})`,
-      icon_url: member.user.avatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
+      name: `${displayName}`,
+      icon_url: member.displayAvatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
     }
   });
 };
