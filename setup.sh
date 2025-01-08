@@ -22,10 +22,6 @@ nvm install --lts
 echo "Installing node dependencies..."
 npm ci
 
-# Build
-echo "Building..."
-npm run build
-
 # Set Systemd
 echo "Setting up Systemd..."
 sudo cp ./discord-bot.service /etc/systemd/system/discord-bot.service
