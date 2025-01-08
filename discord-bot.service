@@ -2,9 +2,9 @@
 Description=MineCode Discord Bot
 
 [Service]
-User=ubuntu
-ExecStart=/home/ubuntu/app/discord-bot/start.sh
-EnvironmentFile=/home/ubuntu/app/discord-bot/.env
+User=ec2-user
+ExecStart=/home/ec2-user/app/discord-bot/start.sh
+EnvironmentFile=/home/ec2-user/app/discord-bot/.env
 Restart=always
 
 [Install]
