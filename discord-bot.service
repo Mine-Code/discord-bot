@@ -3,8 +3,8 @@ Description=MineCode Discord Bot
 
 [Service]
 User=ec2-user
-ExecStart=/home/ec2-user/app/discord-bot/start.sh
-EnvironmentFile=/home/ec2-user/app/discord-bot/.env
+ExecStart=/home/ec2-user/discord-bot/start.sh
+EnvironmentFile=/home/ec2-user/discord-bot/.env
 Restart=always
 
 [Install]
