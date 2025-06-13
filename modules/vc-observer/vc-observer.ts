@@ -3,10 +3,13 @@ import {
   SlashCommandBuilder,
   SlashCommandSubcommandBuilder,
   Events,
+  TextChannel,
+  NewsChannel,
+  ThreadChannel,
 } from "discord.js";
 
 import { BotModule } from "../generics";
-import { isChannelTextBased } from "../utils";
+import { isGuildTextChannel } from "../utils";
 import { NOTIFICATION_TEMPLATE } from "./template";
 import {
   BASE_COMMANDS,
@@ -39,17 +42,12 @@ export class VCObserver extends BotModule {
   }
 
   command() {
-    const subCommands = Object.entries(SUB_COMMANDS).map(
-      ([subCommand, description]) =>
-        new SlashCommandSubcommandBuilder()
-          .setName(subCommand)
-          .setDescription(description)
+    const subCommands = Object.entries(SUB_COMMANDS).map(([subCommand, description]) =>
+      new SlashCommandSubcommandBuilder().setName(subCommand).setDescription(description),
     );
 
     const baseCommands = BASE_COMMANDS.map((baseCommand) =>
-      new SlashCommandBuilder()
-        .setName(baseCommand)
-        .setDescription(this.description)
+      new SlashCommandBuilder().setName(baseCommand).setDescription(this.description),
     );
 
     subCommands.forEach((subcommand) => {
@@ -67,13 +65,15 @@ export class VCObserver extends BotModule {
 
       const newUserChannel = newState.channel; // 新たに参加したチャンネル
       const oldUserChannel = oldState.channel; // 退出したチャンネル
-      const notifyChannel = this.client.channels.cache.get(
-        this.env.OBSERVER_CHANNEL_ID
-      );
+      const notifyChannel = this.client.channels.cache.get(this.env.OBSERVER_CHANNEL_ID);
 
       // 新たにチャンネルに参加した場合
       if (oldUserChannel === null && newUserChannel !== null) {
-        if (!isChannelTextBased(notifyChannel)) return;
+        if (
+          (!isGuildTextChannel(notifyChannel) && !(notifyChannel instanceof ThreadChannel)) ||
+          !newState.member
+        )
+          return;
         notifyChannel.send({
           embeds: [
             NOTIFICATION_TEMPLATE(
@@ -89,7 +89,11 @@ export class VCObserver extends BotModule {
 
       // チャンネルから退出した場合
       if (oldUserChannel !== null && newUserChannel === null) {
-        if (!isChannelTextBased(notifyChannel)) return;
+        if (
+          (!isGuildTextChannel(notifyChannel) && !(notifyChannel instanceof ThreadChannel)) ||
+          !oldState.member
+        )
+          return;
         notifyChannel.send({
           embeds: [
             NOTIFICATION_TEMPLATE(
@@ -109,7 +113,11 @@ export class VCObserver extends BotModule {
         newUserChannel !== null &&
         oldUserChannel.id !== newUserChannel.id
       ) {
-        if (!isChannelTextBased(notifyChannel)) return;
+        if (
+          (!isGuildTextChannel(notifyChannel) && !(notifyChannel instanceof ThreadChannel)) ||
+          !newState.member
+        )
+          return;
         notifyChannel.send({
           embeds: [
             NOTIFICATION_TEMPLATE(
@@ -164,9 +172,7 @@ export class VCObserver extends BotModule {
 
   help() {
     return `
-Base Commands: [ ${BASE_COMMANDS.map((baseCommand) => `/${baseCommand}`).join(
-      ", "
-    )} ]
+Base Commands: [ ${BASE_COMMANDS.map((baseCommand) => `/${baseCommand}`).join(", ")} ]
 Sub Commands:
 ${Object.entries(SUB_COMMANDS)
   .map(([subCommand, description]) => `${subCommand}: ${description}`)

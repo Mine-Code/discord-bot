@@ -12,5 +12,5 @@ export const SUB_COMMAND_PING = "ping";
 export const SUB_COMMANDS = {
   [SUB_COMMAND_HELP]: "システムコントローラーのヘルプを表示する",
   [SUB_COMMAND_INFO]: "システムコントローラーの情報を表示する",
-  [SUB_COMMAND_PING]: "テストメッセージを表示する"
+  [SUB_COMMAND_PING]: "テストメッセージを表示する",
 };

@@ -12,7 +12,7 @@ export const SUB_COMMAND_RENDER = "render";
 export const SUB_COMMANDS = {
   [SUB_COMMAND_HELP]: "TeX 数式描画システムのヘルプを表示する",
   [SUB_COMMAND_INFO]: "TeX 数式描画システムの情報を表示する",
-  [SUB_COMMAND_RENDER]: "数式を描画する"
+  [SUB_COMMAND_RENDER]: "数式を描画する",
 };
 
 export const WIDTH_ATTR_REGEX = /width="([^"]*)"/;

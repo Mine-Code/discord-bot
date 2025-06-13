@@ -27,15 +27,11 @@ export class SystemController extends BotModule {
       .setName(BASE_COMMAND)
       .setDescription(this.description)
       .addSubcommand((subcommand) =>
-        subcommand
-          .setName(SUB_COMMAND_HELP)
-          .setDescription(SUB_COMMANDS[SUB_COMMAND_HELP])
+        subcommand.setName(SUB_COMMAND_HELP).setDescription(SUB_COMMANDS[SUB_COMMAND_HELP]),
       )
       .addSubcommand((subcommand) =>
-        subcommand
-          .setName(SUB_COMMAND_INFO)
-          .setDescription(SUB_COMMANDS[SUB_COMMAND_INFO])
-          )
+        subcommand.setName(SUB_COMMAND_INFO).setDescription(SUB_COMMANDS[SUB_COMMAND_INFO]),
+      )
       .addSubcommand((subcommand) =>
         subcommand
           .setName(SUB_COMMAND_PING)
@@ -43,12 +39,10 @@ export class SystemController extends BotModule {
           .addBooleanOption((option) =>
             option
               .setName(SUB_COMMAND_PING_OPTION_MESSAGE)
-              .setDescription(
-                SUB_COMMAND_PING_OPTIONS[SUB_COMMAND_PING_OPTION_MESSAGE]
-              )
-              .setRequired(true)
-          )
-      )
+              .setDescription(SUB_COMMAND_PING_OPTIONS[SUB_COMMAND_PING_OPTION_MESSAGE])
+              .setRequired(true),
+          ),
+      );
 
     return [baseCommands.toJSON()];
   }
@@ -77,20 +71,17 @@ export class SystemController extends BotModule {
           break;
         }
         case SUB_COMMAND_PING: {
-          const isEphemeral = interaction.options.getBoolean(
-            SUB_COMMAND_PING_OPTION_MESSAGE
-          );
-          
+          const isEphemeral = interaction.options.getBoolean(SUB_COMMAND_PING_OPTION_MESSAGE);
+
           await interaction.reply({
             content: "pong!",
-            ephemeral: isEphemeral ?? false
+            ephemeral: isEphemeral ?? false,
           });
 
           break;
         }
       }
     });
-
   }
 
   help() {

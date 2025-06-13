@@ -1,8 +1,9 @@
-import { Client, SlashCommandBuilder, Events } from "discord.js";
-import * as mj from 'mathjax-node';
-import { chromium } from 'playwright';
+import { Client, SlashCommandBuilder, Events, ThreadChannel } from "discord.js";
+import * as mj from "mathjax-node";
+import { chromium } from "playwright";
 
 import { BotModule } from "../generics";
+import { isGuildTextChannel } from "../utils";
 import { Env } from "../../main";
 
 import {
@@ -16,7 +17,6 @@ import {
   WIDTH_ATTR_REGEX,
   HEIGHT_ATTR_REGEX,
 } from "./constants";
-
 
 export class TexRenderer extends BotModule {
   name = "TeX 数式描画システム";
@@ -33,15 +33,11 @@ export class TexRenderer extends BotModule {
       .setName(BASE_COMMAND)
       .setDescription(this.description)
       .addSubcommand((subcommand) =>
-        subcommand
-          .setName(SUB_COMMAND_HELP)
-          .setDescription(SUB_COMMANDS[SUB_COMMAND_HELP])
-          )
+        subcommand.setName(SUB_COMMAND_HELP).setDescription(SUB_COMMANDS[SUB_COMMAND_HELP]),
+      )
       .addSubcommand((subcommand) =>
-        subcommand
-          .setName(SUB_COMMAND_INFO)
-          .setDescription(SUB_COMMANDS[SUB_COMMAND_INFO])
-          )
+        subcommand.setName(SUB_COMMAND_INFO).setDescription(SUB_COMMANDS[SUB_COMMAND_INFO]),
+      )
       .addSubcommand((subcommand) =>
         subcommand
           .setName(SUB_COMMAND_RENDER)
@@ -49,29 +45,32 @@ export class TexRenderer extends BotModule {
           .addStringOption((option) =>
             option
               .setName(SUB_COMMAND_RENDER_OPTION_MESSAGE)
-              .setDescription(
-                SUB_COMMAND_RENDER_OPTIONS[SUB_COMMAND_RENDER_OPTION_MESSAGE]
-              )
-              .setRequired(true)
-          )
-      )
+              .setDescription(SUB_COMMAND_RENDER_OPTIONS[SUB_COMMAND_RENDER_OPTION_MESSAGE])
+              .setRequired(true),
+          ),
+      );
 
     return [baseCommands.toJSON()];
   }
 
   async renderLatex(latex: string): Promise<Buffer> {
     mj.config({
-        MathJax: {
-            // traditional MathJax configuration
-        }
+      MathJax: {
+        // traditional MathJax configuration
+      },
     });
     mj.start();
 
-    const input = { math: latex, format: 'TeX', svg: true };
-    const data = await mj.typeset(input);
-    if (data.errors) {
-        throw new Error(data.errors);
-    }
+    const input = { math: latex, format: "TeX" as const, svg: true };
+    const data = await new Promise<any>((resolve, reject) => {
+      mj.typeset(input, (result: any) => {
+        if (result.errors) {
+          reject(new Error(result.errors));
+        } else {
+          resolve(result);
+        }
+      });
+    });
     const svg = data.svg;
 
     const width = parseFloat(svg.match(WIDTH_ATTR_REGEX)[1]);
@@ -84,15 +83,15 @@ export class TexRenderer extends BotModule {
     const browser = await chromium.launch();
     const page = await browser.newPage();
     await page.setContent(
-        svg
-            .replace(WIDTH_ATTR_REGEX, `width="${scaledWidth}ex"`)
-            .replace(HEIGHT_ATTR_REGEX, `height="${scaledHeight}ex"`)
+      svg
+        .replace(WIDTH_ATTR_REGEX, `width="${scaledWidth}ex"`)
+        .replace(HEIGHT_ATTR_REGEX, `height="${scaledHeight}ex"`),
     );
-    const svgElement = await page.$('svg');
+    const svgElement = await page.$("svg");
     if (!svgElement) {
-        throw new Error('SVG element not found');
+      throw new Error("SVG element not found");
     }
-    const buffer = await svgElement.screenshot({ type: 'png' });
+    const buffer = await svgElement.screenshot({ type: "png" });
     await browser.close();
     return buffer;
   }
@@ -106,7 +105,7 @@ export class TexRenderer extends BotModule {
       const subCommand = interaction.options.getSubcommand();
 
       switch (subCommand) {
-        case SUB_COMMAND_HELP: {      
+        case SUB_COMMAND_HELP: {
           await interaction.reply({
             content: this.help(),
           });
@@ -119,9 +118,7 @@ export class TexRenderer extends BotModule {
           break;
         }
         case SUB_COMMAND_RENDER: {
-          const text = interaction.options.getString(
-            SUB_COMMAND_RENDER_OPTION_MESSAGE
-          );
+          const text = interaction.options.getString(SUB_COMMAND_RENDER_OPTION_MESSAGE);
 
           // なぜか .setRequired(true) を指定してもnullになってしまったらエラーを返す
           if (!text) {
@@ -136,16 +133,20 @@ export class TexRenderer extends BotModule {
 
           const channel = interaction.channel;
 
-          channel.sendTyping();
-          count++;
+          if (isGuildTextChannel(channel) || channel instanceof ThreadChannel) {
+            await channel.sendTyping();
+            count++;
+          }
 
-          const interval = setInterval(() => {
+          const interval = setInterval(async () => {
             if (count > 10) {
               clearInterval(interval);
               return;
             }
-            channel.sendTyping();
-            count++;
+            if (isGuildTextChannel(channel) || channel instanceof ThreadChannel) {
+              await channel.sendTyping();
+              count++;
+            }
           }, 5000);
 
           // 数式を描画する(エラー時はエラーを返す)
@@ -154,15 +155,15 @@ export class TexRenderer extends BotModule {
             await interaction.reply({
               files: [buffer],
             });
-          } catch (e) {            
+          } catch (e) {
             await interaction.reply({
-              content: e.toString(),
+              content: e instanceof Error ? e.message : String(e),
               ephemeral: true,
             });
             clearInterval(interval);
             return;
           }
-          
+
           clearInterval(interval);
           break;
         }

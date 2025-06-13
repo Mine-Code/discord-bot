@@ -18,13 +18,7 @@ const env = envSchema.parse(process.env);
 process.env.TZ = "Asia/Tokyo";
 
 const client = new Client({
-  intents: [
-    "Guilds",
-    "GuildVoiceStates",
-    "GuildMessages",
-    "GuildMembers",
-    "MessageContent",
-  ],
+  intents: ["Guilds", "GuildVoiceStates", "GuildMessages", "GuildMembers", "MessageContent"],
 });
 
 client.once("ready", () => {
