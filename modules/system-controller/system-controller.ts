@@ -1,4 +1,4 @@
-import { Client, SlashCommandBuilder, Events } from "discord.js";
+import { Client, SlashCommandBuilder, Events, MessageFlags } from "discord.js";
 
 import { BotModule } from "../generics";
 import { Env } from "../../main";
@@ -75,7 +75,7 @@ export class SystemController extends BotModule {
 
           await interaction.reply({
             content: "pong!",
-            ephemeral: isEphemeral ?? false,
+            flags: isEphemeral ? MessageFlags.Ephemeral : undefined,
           });
 
           break;

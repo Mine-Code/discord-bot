@@ -1,4 +1,4 @@
-import { Client, SlashCommandBuilder, Events, ThreadChannel } from "discord.js";
+import { Client, SlashCommandBuilder, Events, ThreadChannel, MessageFlags } from "discord.js";
 import * as mj from "mathjax-node";
 import { chromium } from "playwright";
 
@@ -124,7 +124,7 @@ export class TexRenderer extends BotModule {
           if (!text) {
             await interaction.reply({
               content: "文字列を指定してください",
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
             return;
           }
@@ -158,7 +158,7 @@ export class TexRenderer extends BotModule {
           } catch (e) {
             await interaction.reply({
               content: e instanceof Error ? e.message : String(e),
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
             clearInterval(interval);
             return;

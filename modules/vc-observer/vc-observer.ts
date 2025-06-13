@@ -6,6 +6,7 @@ import {
   TextChannel,
   NewsChannel,
   ThreadChannel,
+  MessageFlags,
 } from "discord.js";
 
 import { BotModule } from "../generics";
@@ -149,21 +150,21 @@ export class VCObserver extends BotModule {
         case SUB_COMMAND_INFO:
           interaction.reply({
             content: this.info(),
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
         case SUB_COMMAND_DISABLE:
           this.enabled = false;
           interaction.reply({
             content: "監視を停止しました",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
         case SUB_COMMAND_ENABLE:
           this.enabled = true;
           interaction.reply({
             content: "監視を再開しました",
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           break;
       }
