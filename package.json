@@ -6,7 +6,8 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "dev": "tsx main.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "format": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json}'"
   },
   "dependencies": {
     "discord.js": "^14.14.1",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/mathjax-node": "^2.1.0",
     "@types/node": "^24.0.1",
+    "prettier": "^3.5.3",
     "tsx": "^4.20.3",
     "vitest": "^3.2.3"
   },
