@@ -21,7 +21,6 @@
   },
   "devDependencies": {
     "@types/mathjax": "^0.0.40",
-    "@types/node": "^24.0.1",
     "prettier": "^3.5.3",
     "tsx": "^4.20.3",
     "vitest": "^3.2.3"
@@ -31,13 +30,5 @@
       "esbuild",
       "sharp"
     ]
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "os": [
-    "linux",
-    "darwin",
-    "win32"
-  ]
+  }
 }

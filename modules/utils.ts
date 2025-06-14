@@ -1,4 +1,4 @@
-import { Channel, TextBasedChannel, TextChannel, NewsChannel, ThreadChannel } from "discord.js";
+import { Channel, TextBasedChannel, TextChannel, NewsChannel } from "discord.js";
 
 const CHANNEL_NOT_FOUND_MESSAGE = "Channel not found";
 const CHANNEL_NOT_TEXT_BASED_MESSAGE = "Channel is not text channel";

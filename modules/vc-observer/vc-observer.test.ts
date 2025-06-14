@@ -2,24 +2,13 @@ import { describe, it, expect, beforeEach, vi, Mock } from "vitest";
 import { VCObserver } from "./vc-observer";
 import { NOTIFICATION_TEMPLATE } from "./template";
 import {
-  BASE_COMMANDS,
   SUB_COMMAND_HELP,
   SUB_COMMAND_INFO,
   SUB_COMMAND_DISABLE,
   SUB_COMMAND_ENABLE,
   SUB_COMMANDS,
-  OBSERVATION_DISABLED_FROM,
-  OBSERVATION_DISABLED_TO,
 } from "./constants";
-import {
-  Client,
-  Events,
-  VoiceState,
-  GuildMember,
-  VoiceChannel,
-  Collection,
-  MessageFlags,
-} from "discord.js";
+import { Events, MessageFlags } from "discord.js";
 
 // Discord.jsのモック
 vi.mock("discord.js", async () => {

@@ -122,7 +122,11 @@ export class TexRenderer extends BotModule {
     });
   }
 
-  private async processRender(interaction: any, text: string, scale: number) {
+  private async processRender(
+    interaction: ChatInputCommandInteraction,
+    text: string,
+    scale: number,
+  ) {
     let hasTimedOut = false;
 
     const safeReply = async (reply: { content?: string; files?: any[] }) => {

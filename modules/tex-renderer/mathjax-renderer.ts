@@ -174,9 +174,16 @@ export class MathJaxRenderer {
       if (error instanceof Error) {
         if (error.message.includes("ParseError")) {
           // LaTeX構文エラー
+          console.error("LaTeX syntax error:", error.message);
         } else if (error.message.includes("Sharp")) {
           // 画像処理エラー
+          console.error("Image processing error:", error.message);
+        } else {
+          // その他のエラー
+          console.error("Unexpected error during rendering:", error.message);
         }
+      } else {
+        console.error("Unknown error during rendering:", error);
       }
 
       return null;
