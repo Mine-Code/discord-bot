@@ -72,9 +72,8 @@ echo "⚙️  Setting up systemd service..."
 sed -e "s|%USER%|$CURRENT_USER|g" -e "s|%INSTALL_PATH%|$CURRENT_PATH|g" discord-bot.service > /tmp/discord-bot.service
 
 # Install service
-cat /tmp/discord-bot.service
-# sudo cp /tmp/discord-bot.service /etc/systemd/system/discord-bot.service
-# sudo systemctl daemon-reload
+sudo cp /tmp/discord-bot.service /etc/systemd/system/discord-bot.service
+sudo systemctl daemon-reload
 
 # Create log directory
 sudo mkdir -p /var/log/discord-bot
