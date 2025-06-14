@@ -26,6 +26,7 @@ vi.mock("discord.js", async () => {
       setName: vi.fn().mockReturnThis(),
       setDescription: vi.fn().mockReturnThis(),
     })),
+    ThreadChannel: vi.fn(),
     Events: {
       VoiceStateUpdate: "voiceStateUpdate",
       InteractionCreate: "interactionCreate",
@@ -60,6 +61,9 @@ describe("VCObserver", () => {
   let mockInteraction: any;
 
   beforeEach(() => {
+    // モックのリセット
+    vi.clearAllMocks();
+
     // クライアントのモック
     mockClient = {
       on: vi.fn(),
@@ -81,6 +85,7 @@ describe("VCObserver", () => {
     // チャンネルのモック
     mockChannel = {
       send: vi.fn(),
+      id: "test-channel-id",
     };
 
     // ギルドメンバーのモック
@@ -113,6 +118,7 @@ describe("VCObserver", () => {
       reply: vi.fn(),
     };
 
+    // モッククライアントのチャンネルキャッシュ設定
     mockClient.channels.cache.get.mockReturnValue(mockChannel);
 
     vcObserver = new VCObserver(mockClient, mockEnv);
