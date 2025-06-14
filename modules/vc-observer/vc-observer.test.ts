@@ -13,6 +13,11 @@ import { Events, MessageFlags } from "discord.js";
 // Discord.jsのモック
 vi.mock("discord.js", async () => {
   const actual = await import("discord.js");
+
+  // ThreadChannelのモッククラス
+  const MockThreadChannel = vi.fn();
+  MockThreadChannel.prototype = Object.create(Object.prototype);
+
   return {
     ...actual,
     Client: vi.fn(),
@@ -26,7 +31,7 @@ vi.mock("discord.js", async () => {
       setName: vi.fn().mockReturnThis(),
       setDescription: vi.fn().mockReturnThis(),
     })),
-    ThreadChannel: vi.fn(),
+    ThreadChannel: MockThreadChannel,
     Events: {
       VoiceStateUpdate: "voiceStateUpdate",
       InteractionCreate: "interactionCreate",
@@ -46,10 +51,16 @@ vi.mock("./template", () => ({
   }),
 }));
 
-// utilsのモック
-vi.mock("../utils", () => ({
-  isGuildTextChannel: vi.fn().mockReturnValue(true),
-}));
+vi.mock("../utils", () => {
+  const mockIsGuildTextChannel = vi.fn((channel) => {
+    // mockChannelに対してはtrueを返す
+    return channel && channel.id === "test-channel-id";
+  });
+
+  return {
+    isGuildTextChannel: mockIsGuildTextChannel,
+  };
+});
 
 describe("VCObserver", () => {
   let vcObserver: VCObserver;
@@ -83,10 +94,10 @@ describe("VCObserver", () => {
     };
 
     // チャンネルのモック
-    mockChannel = {
-      send: vi.fn(),
-      id: "test-channel-id",
-    };
+    const MockThreadChannel = vi.fn();
+    mockChannel = Object.create(MockThreadChannel.prototype);
+    mockChannel.send = vi.fn();
+    mockChannel.id = "test-channel-id";
 
     // ギルドメンバーのモック
     mockGuildMember = {
@@ -287,9 +298,9 @@ describe("VCObserver", () => {
         ([event]: [string, any]) => event === Events.VoiceStateUpdate,
       );
 
-      // 現在時刻をモック（通知無効化時間帯に設定）
+      // 現在時刻をモック (通知無効化時間帯に設定)
       const mockDate = new Date();
-      mockDate.setHours(5); // 4-8時の間
+      mockDate.setHours(5); // 4 - 8 時の間
       vi.spyOn(global, "Date").mockImplementation(() => mockDate as any);
 
       const oldState = {
