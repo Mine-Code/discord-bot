@@ -1,6 +1,11 @@
-import { Client, SlashCommandBuilder, Events, ThreadChannel, MessageFlags } from "discord.js";
+import {
+  Client,
+  SlashCommandBuilder,
+  Events,
+  MessageFlags,
+  ChatInputCommandInteraction,
+} from "discord.js";
 import { BotModule } from "../generics";
-import { isGuildTextChannel } from "../utils";
 import { Env } from "../../main";
 import { MathJaxRenderer } from "./mathjax-renderer";
 
