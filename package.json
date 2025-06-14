@@ -7,6 +7,7 @@
     "start": "node dist/main.js",
     "dev": "tsx main.ts",
     "test": "vitest",
+    "check": "tsc --noEmit",
     "format": "prettier --write --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,json}'"
   },
   "dependencies": {
