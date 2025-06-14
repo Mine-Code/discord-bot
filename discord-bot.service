@@ -1,11 +1,26 @@
 [Unit]
 Description=MineCode Discord Bot
+After=network.target
 
 [Service]
-User=ubuntu
-ExecStart=/home/ubuntu/app/discord-bot/start.sh
-EnvironmentFile=/home/ubuntu/app/discord-bot/.env
+Type=simple
+User=%USER%
+Group=%USER%
+WorkingDirectory=%INSTALL_PATH%
+ExecStart=%INSTALL_PATH%/start.sh
+EnvironmentFile=%INSTALL_PATH%/.env
 Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=discord-bot
+
+# Security settings for production
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=%INSTALL_PATH%
 
 [Install]
 WantedBy=multi-user.target

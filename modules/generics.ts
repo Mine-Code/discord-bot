@@ -1,7 +1,4 @@
-import {
-  Client,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from "discord.js";
+import { Client, RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
 import { Env } from "../main";
 
 export abstract class BotModule {

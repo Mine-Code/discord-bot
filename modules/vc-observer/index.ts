@@ -1,1 +1,1 @@
-export * from "./vc-observer"
+export * from "./vc-observer";

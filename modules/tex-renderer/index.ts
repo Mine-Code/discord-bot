@@ -1,1 +1,1 @@
-export * from "./tex-renderer"
+export * from "./tex-renderer";

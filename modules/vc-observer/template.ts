@@ -31,7 +31,7 @@ export const NOTIFICATION_TEMPLATE = (
       color = 0xf1f104;
       break;
   }
-  
+
   return new EmbedBuilder({
     title,
     description,
@@ -50,6 +50,6 @@ export const NOTIFICATION_TEMPLATE = (
     author: {
       name: `${displayName}`,
       icon_url: member.displayAvatarURL() ?? USER_IMAGE_NOT_FOUND_URL,
-    }
+    },
   });
 };

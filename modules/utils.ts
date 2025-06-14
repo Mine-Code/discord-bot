@@ -1,21 +1,17 @@
-import { Channel, TextBasedChannel } from "discord.js";
+import { Channel, TextBasedChannel, TextChannel, NewsChannel } from "discord.js";
 
 const CHANNEL_NOT_FOUND_MESSAGE = "Channel not found";
 const CHANNEL_NOT_TEXT_BASED_MESSAGE = "Channel is not text channel";
 
-export const isChannelTextBased = (
-  channel?: Channel
-): channel is TextBasedChannel => {
+// sendメソッドとsendTypingメソッドを持つギルドテキストチャンネルかチェック
+export const isGuildTextChannel = (
+  channel?: Channel | null,
+): channel is TextChannel | NewsChannel => {
   // そもそもチャンネルが見つからない場合
   if (!channel) {
     console.error(CHANNEL_NOT_FOUND_MESSAGE);
     return false;
   }
-  // チャンネルがテキストチャンネルでない場合
-  if (!channel.isTextBased()) {
-    console.error(CHANNEL_NOT_TEXT_BASED_MESSAGE);
-    return false;
-  }
-
-  return true;
+  // TextChannelとNewsChannelはsendとsendTyping両方を持つ
+  return channel instanceof TextChannel || channel instanceof NewsChannel;
 };
