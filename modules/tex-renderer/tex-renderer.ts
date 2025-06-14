@@ -1,10 +1,8 @@
 import { Client, SlashCommandBuilder, Events, ThreadChannel, MessageFlags } from "discord.js";
-import * as mj from "mathjax-node";
-import { chromium } from "playwright";
-
 import { BotModule } from "../generics";
 import { isGuildTextChannel } from "../utils";
 import { Env } from "../../main";
+import { MathJaxRenderer } from "./mathjax-renderer";
 
 import {
   BASE_COMMAND,
@@ -14,18 +12,24 @@ import {
   SUB_COMMAND_RENDER,
   SUB_COMMAND_RENDER_OPTIONS,
   SUB_COMMAND_RENDER_OPTION_MESSAGE,
-  WIDTH_ATTR_REGEX,
-  HEIGHT_ATTR_REGEX,
+  SUB_COMMAND_RENDER_OPTION_SCALE,
+  SCALE_MIN,
+  SCALE_MAX,
+  SCALE_DEFAULT,
+  RENDER_TIMEOUT_MS,
 } from "./constants";
 
 export class TexRenderer extends BotModule {
-  name = "TeX 数式描画システム";
-  description = "LaTeXの数式モードの記法で数式を描画できます";
-  version = "1.0.0";
+  name = "数式描画システム";
+  description = "LaTeX数式を画像として描画します";
+  version = "3.0.0";
   author = "yukikamome316";
+
+  private renderer: MathJaxRenderer;
 
   constructor(client: Client, env: Env) {
     super(client, env);
+    this.renderer = new MathJaxRenderer();
   }
 
   command() {
@@ -47,53 +51,18 @@ export class TexRenderer extends BotModule {
               .setName(SUB_COMMAND_RENDER_OPTION_MESSAGE)
               .setDescription(SUB_COMMAND_RENDER_OPTIONS[SUB_COMMAND_RENDER_OPTION_MESSAGE])
               .setRequired(true),
+          )
+          .addNumberOption((option) =>
+            option
+              .setName(SUB_COMMAND_RENDER_OPTION_SCALE)
+              .setDescription(SUB_COMMAND_RENDER_OPTIONS[SUB_COMMAND_RENDER_OPTION_SCALE])
+              .setRequired(false)
+              .setMinValue(SCALE_MIN)
+              .setMaxValue(SCALE_MAX),
           ),
       );
 
     return [baseCommands.toJSON()];
-  }
-
-  async renderLatex(latex: string): Promise<Buffer> {
-    mj.config({
-      MathJax: {
-        // traditional MathJax configuration
-      },
-    });
-    mj.start();
-
-    const input = { math: latex, format: "TeX" as const, svg: true };
-    const data = await new Promise<any>((resolve, reject) => {
-      mj.typeset(input, (result: any) => {
-        if (result.errors) {
-          reject(new Error(result.errors));
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    const svg = data.svg;
-
-    const width = parseFloat(svg.match(WIDTH_ATTR_REGEX)[1]);
-    const height = parseFloat(svg.match(HEIGHT_ATTR_REGEX)[1]);
-
-    const scale = 2;
-    const scaledWidth = width * scale;
-    const scaledHeight = height * scale;
-
-    const browser = await chromium.launch();
-    const page = await browser.newPage();
-    await page.setContent(
-      svg
-        .replace(WIDTH_ATTR_REGEX, `width="${scaledWidth}ex"`)
-        .replace(HEIGHT_ATTR_REGEX, `height="${scaledHeight}ex"`),
-    );
-    const svgElement = await page.$("svg");
-    if (!svgElement) {
-      throw new Error("SVG element not found");
-    }
-    const buffer = await svgElement.screenshot({ type: "png" });
-    await browser.close();
-    return buffer;
   }
 
   init() {
@@ -119,65 +88,134 @@ export class TexRenderer extends BotModule {
         }
         case SUB_COMMAND_RENDER: {
           const text = interaction.options.getString(SUB_COMMAND_RENDER_OPTION_MESSAGE);
+          const scale =
+            interaction.options.getNumber(SUB_COMMAND_RENDER_OPTION_SCALE) ?? SCALE_DEFAULT;
 
-          // なぜか .setRequired(true) を指定してもnullになってしまったらエラーを返す
           if (!text) {
             await interaction.reply({
-              content: "文字列を指定してください",
+              content: "数式を指定してください",
               flags: MessageFlags.Ephemeral,
             });
             return;
           }
 
-          let count = 0;
-
-          const channel = interaction.channel;
-
-          if (isGuildTextChannel(channel) || channel instanceof ThreadChannel) {
-            await channel.sendTyping();
-            count++;
-          }
-
-          const interval = setInterval(async () => {
-            if (count > 10) {
-              clearInterval(interval);
-              return;
-            }
-            if (isGuildTextChannel(channel) || channel instanceof ThreadChannel) {
-              await channel.sendTyping();
-              count++;
-            }
-          }, 5000);
-
-          // 数式を描画する(エラー時はエラーを返す)
-          try {
-            const buffer = await this.renderLatex(text);
+          // 構文検証
+          const validation = await this.renderer.validateTeX(text);
+          if (!validation.valid) {
             await interaction.reply({
-              files: [buffer],
-            });
-          } catch (e) {
-            await interaction.reply({
-              content: e instanceof Error ? e.message : String(e),
+              content: `❌ LaTeX 構文エラーが発生しました:\n\`\`\`\n${validation.error}\n\`\`\`\n入力:\n\`\`\`latex\n${text}\n\`\`\``,
               flags: MessageFlags.Ephemeral,
             });
-            clearInterval(interval);
             return;
           }
 
-          clearInterval(interval);
+          await interaction.deferReply();
+          await this.processRender(interaction, text, scale);
           break;
         }
       }
     });
   }
 
+  private async processRender(interaction: any, text: string, scale: number) {
+    let hasTimedOut = false;
+
+    const safeReply = async (reply: { content?: string; files?: any[] }) => {
+      if (hasTimedOut) return;
+
+      try {
+        await interaction.editReply(reply);
+      } catch (error) {
+        console.error("Reply failed:", error);
+      }
+    };
+
+    const timeoutTimer = setTimeout(async () => {
+      hasTimedOut = true;
+      await safeReply({
+        content: `⏰ **タイムアウト**\n処理に${RENDER_TIMEOUT_MS / 1000}秒以上かかったため中断しました。\n\n**入力:**\n\`\`\`latex\n${text}\n\`\`\``,
+      });
+    }, RENDER_TIMEOUT_MS);
+
+    try {
+      // スケールが大きい場合の警告
+      if (scale > 3.0) {
+        await safeReply({
+          content: `⚠️ スケール${scale}は大きすぎる可能性があります。生成に時間がかかったり、ファイルサイズが制限を超える場合があります。`,
+        });
+      }
+
+      const attachment = await this.renderer.renderTeX(text, { scale });
+      clearTimeout(timeoutTimer);
+
+      if (hasTimedOut) return;
+
+      if (attachment) {
+        // ファイルサイズをチェック (8MB制限)
+        const MAX_FILE_SIZE = 8 * 1024 * 1024;
+        const fileBuffer = attachment.attachment as Buffer;
+
+        if (fileBuffer && fileBuffer.length > MAX_FILE_SIZE) {
+          const fileSizeMB = (fileBuffer.length / (1024 * 1024)).toFixed(2);
+          await safeReply({
+            content: `❌ **ファイルサイズエラー**\n生成された画像が大きすぎます (${fileSizeMB}MB > 8MB 制限)。scale を小さくしてください (現在: ${scale})\n\n**入力:**\n\`\`\`latex\n${text}\n\`\`\``,
+          });
+        } else {
+          await safeReply({ files: [attachment] });
+        }
+      } else {
+        await safeReply({
+          content: `⚠️ **描画エラー**\n画像生成に失敗しました。\n\n**代替表示:**\n\`\`\`latex\n${text}\n\`\`\``,
+        });
+      }
+    } catch (e) {
+      clearTimeout(timeoutTimer);
+      if (hasTimedOut) return;
+
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      await safeReply({
+        content: `❌ **システムエラー**\n\`\`\`\n${errorMessage}\n\`\`\`\n\n**入力:**\n\`\`\`latex\n${text}\n\`\`\``,
+      });
+    }
+  }
+
   help() {
     return `
-Base Commands: [ ${BASE_COMMAND} ]
+**数式描画システム v2.0.0**
+
+Base Commands: \`/${BASE_COMMAND}\`
+
 Sub Commands:
 ${Object.entries(SUB_COMMANDS)
-  .map(([subCommand, description]) => `${subCommand}: ${description}`)
+  .map(([subCommand, description]) => `• \`${subCommand}\`: ${description}`)
   .join("\n")}
+
+**使用例:**
+\`/${BASE_COMMAND} ${SUB_COMMAND_RENDER} x^2 + y^2 = z^2\`
+\`/${BASE_COMMAND} ${SUB_COMMAND_RENDER} \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a} ${SUB_COMMAND_RENDER_OPTION_SCALE}:1.5\`
+\`/${BASE_COMMAND} ${SUB_COMMAND_RENDER} \\sum_{i=1}^{n} i^2 = \\frac{n(n+1)(2n+1)}{6} ${SUB_COMMAND_RENDER_OPTION_SCALE}:0.8\`
+
+**スケールオプション:**
+• \`${SUB_COMMAND_RENDER_OPTION_SCALE}\`: 画像のサイズ倍率 (${SCALE_MIN}〜${SCALE_MAX})
+• デフォルト: ${SCALE_DEFAULT} (標準サイズ)
+• 例: \`${SUB_COMMAND_RENDER_OPTION_SCALE}:1.5\` で1.5倍、\`${SUB_COMMAND_RENDER_OPTION_SCALE}:0.7\` で0.7倍
+`.trim();
+  }
+
+  info() {
+    const systemInfo = MathJaxRenderer.getSystemInfo();
+    return `
+**システム情報**
+🔧 レンダラー: ${systemInfo.renderer}
+
+**サポートする記法:**
+• 基本的な数式: \`x^2, x_1, \\frac{a}{b}\`
+• ギリシャ文字: \`\\alpha, \\beta, \\gamma\`
+• 大きな演算子: \`\\sum, \\int, \\prod\`
+• ベクトル・行列: \`\\vec{v}, \\begin{matrix}...\`
+• 関数: \`\\sin, \\cos, \\log, \\lim\`
+
+その他の記法: https://docs.mathjax.org/en/latest/input/tex/
 `.trim();
   }
 }

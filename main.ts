@@ -1,20 +1,20 @@
 import { Client, REST, Routes } from "discord.js";
-import { z } from "zod";
+import * as v from "valibot";
 import * as modules from "./modules";
 import { config } from "dotenv";
 
-const envSchema = z.object({
-  BOT_TOKEN: z.string(),
-  BOT_ID: z.string(),
-  GUILD_ID: z.string(),
-  OBSERVER_CHANNEL_ID: z.string(),
+const envSchema = v.object({
+  BOT_TOKEN: v.string(),
+  BOT_ID: v.string(),
+  GUILD_ID: v.string(),
+  OBSERVER_CHANNEL_ID: v.string(),
 });
 
 config();
 
-export type Env = z.infer<typeof envSchema>;
+export type Env = v.InferInput<typeof envSchema>;
 
-const env = envSchema.parse(process.env);
+const env = v.parse(envSchema, process.env);
 process.env.TZ = "Asia/Tokyo";
 
 const client = new Client({

@@ -9,10 +9,9 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "typeRoots": ["types", "node_modules/@types"],
-    "resolveJsonModule": true,
-    "types": ["mathjax-node"]
+    "typeRoots": ["node_modules/@types"],
+    "resolveJsonModule": true
   },
-  "include": ["main.ts", "modules/**/*.ts", "types/**/*.d.ts"],
+  "include": ["main.ts", "modules/**/*.ts"],
   "exclude": ["node_modules", "dist", "test", "vitest.config.ts"]
 }
