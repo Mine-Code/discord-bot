@@ -7,6 +7,7 @@ MineCode Discord Bot for general purpose use.
 - **TeX Renderer**: LaTeX math rendering using KaTeX + Sharp
 - **VC Observer**: Voice channel activity monitoring
 - **System Controller**: Server management commands
+- **Reaction Forwarder**: Forward messages with specific reactions to designated channels
 
 ## Development
 
@@ -63,6 +64,7 @@ BOT_TOKEN="your_discord_bot_token"
 BOT_ID="your_bot_id"
 GUILD_ID="your_guild_id"
 OBSERVER_CHANNEL_ID="your_channel_id"
+REACTION_FORWARDER_CHANNEL_ID="your_channel_id"
 ```
 
 #### How to Get Each Environment Variable
@@ -83,3 +85,7 @@ OBSERVER_CHANNEL_ID="your_channel_id"
 **OBSERVER_CHANNEL_ID**:
 
 - Right-click the channel where vc-observer notification should be sent → Copy Channel ID
+
+**REACTION_FORWARDER_CHANNEL_ID**:
+
+- Right-click the channel where reaction-forwarder should send forwarded messages → Copy Channel ID

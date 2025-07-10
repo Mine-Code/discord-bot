@@ -40,6 +40,8 @@ export class ReactionForwarder extends BotModule {
 
   constructor(client: Client, env: Env) {
     super(client, env);
+    // 環境変数から設定を上書き
+    this.config.forwardTo = process.env.REACTION_FORWARDER_CHANNEL_ID || "";
   }
 
   command() {
