@@ -170,7 +170,7 @@ export class ReactionForwarder extends BotModule {
         .setTimestamp(message.createdAt)
         .setURL(message.url)
         .setAuthor({
-          name: message.author?.displayName ?? message.author?.tag ?? EMBED_UNKNOWN_USER,
+          name: message.member?.displayName ?? message.author?.username ?? EMBED_UNKNOWN_USER,
           url: message.url,
           iconURL: message.author?.displayAvatarURL(),
         })
@@ -217,7 +217,7 @@ ${Object.entries(SUB_COMMANDS)
 - 状態: ${this.config.enabled ? "有効" : "無効"}
 - 転送先: ${this.config.forwardTo ? `<#${this.config.forwardTo}>` : "未設定"}
 - リアクションの個数: ${this.config.threshold}
-- 監視中のリアクション: ${this.config.reactions.map((id) => `<:bad_socialcredit:${id}>`).join(", ") || "未設定"}
+- 監視中のリアクション: ${this.config.reactions.map((id) => `<:emoji:${id}>`).join(", ") || "未設定"}
 `.trim();
   }
 }
