@@ -143,6 +143,11 @@ export class ReactionForwarder extends BotModule {
       return;
     }
 
+    // 必要な時だけユーザーリストを取得する
+    if (reaction.count <= 1 || reaction.users.cache.size <= 1) {
+      return;
+    }
+
     // リアクションのすべてのユーザーを取得 (投稿者と bot を除外)
     const users = await reaction.users.fetch();
     const relevantUsers = users.filter((u) => u.id !== message.author?.id && !u.bot);
