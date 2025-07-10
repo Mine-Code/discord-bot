@@ -1,4 +1,4 @@
-import { Client, REST, Routes } from "discord.js";
+import { Client, REST, Routes, Partials } from "discord.js";
 import * as v from "valibot";
 import * as modules from "./modules";
 import { config } from "dotenv";
@@ -18,7 +18,15 @@ const env = v.parse(envSchema, process.env);
 process.env.TZ = "Asia/Tokyo";
 
 const client = new Client({
-  intents: ["Guilds", "GuildVoiceStates", "GuildMessages", "GuildMembers", "MessageContent"],
+  intents: [
+    "Guilds",
+    "GuildVoiceStates",
+    "GuildMessages",
+    "GuildMembers",
+    "MessageContent",
+    "GuildMessageReactions",
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 client.once("ready", () => {
