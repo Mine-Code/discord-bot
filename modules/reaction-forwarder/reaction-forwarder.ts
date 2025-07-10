@@ -143,8 +143,8 @@ export class ReactionForwarder extends BotModule {
       return;
     }
 
-    // 必要な時だけユーザーリストを取得する
-    if (reaction.count <= 1 || reaction.users.cache.size <= 1) {
+    // リアクションの数が 0 の場合はユーザーをフェッチしない
+    if (reaction.count <= 0) {
       return;
     }
 
