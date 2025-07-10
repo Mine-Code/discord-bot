@@ -20,6 +20,6 @@ export interface ReactionForwarderConfig {
 }
 
 // UI設定
-export const EMBED_COLOR = 0x93a5a6; // #93a5a6 (light blue)
+export const EMBED_COLOR = 0x93a5a6; // #93a5a6
 export const EMBED_FALLBACK_MESSAGE = "(コメント無し)";
 export const EMBED_UNKNOWN_USER = "Unknown User";
