@@ -64,7 +64,9 @@ BOT_TOKEN="your_discord_bot_token"
 BOT_ID="your_bot_id"
 GUILD_ID="your_guild_id"
 OBSERVER_CHANNEL_ID="your_channel_id"
-REACTION_FORWARDER_CHANNEL_ID="your_channel_id"
+REACTION_FORWARDER_CHANNEL_ID="your_reaction_forwarder_channel_id"
+REACTION_FORWARDER_REACTIONS="emoji_id_1,emoji_id_2,emoji_id_3"
+REACTION_FORWARDER_THRESHOLD="3"
 ```
 
 #### How to Get Each Environment Variable
@@ -89,3 +91,14 @@ REACTION_FORWARDER_CHANNEL_ID="your_channel_id"
 **REACTION_FORWARDER_CHANNEL_ID**:
 
 - Right-click the channel where reaction-forwarder should send forwarded messages → Copy Channel ID
+
+**REACTION_FORWARDER_REACTIONS**:
+
+- Right-click the custom emoji you want to monitor → Copy ID
+- For multiple emojis, separate with commas: `emoji_id_1,emoji_id_2,emoji_id_3`
+- Example: `1183455310992638113,1392815819540533400`
+
+**REACTION_FORWARDER_THRESHOLD**:
+
+- Number of reactions required to forward a message (excluding message author and bots)
+- Example: `3` (requires 3 or more reactions to forward)

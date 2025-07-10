@@ -18,7 +18,6 @@ import {
 import { BotModule } from "../generics";
 import {
   ReactionForwarderConfig,
-  CONFIG,
   BASE_COMMAND,
   SUB_COMMANDS,
   SUB_COMMAND_HELP,
@@ -36,7 +35,7 @@ import { Env } from "../../main";
 const forwardedMessages = new Map<string, string>();
 
 export class ReactionForwarder extends BotModule {
-  private config: ReactionForwarderConfig = { ...CONFIG };
+  private config: ReactionForwarderConfig;
 
   name = "リアクション転送システム";
   description = "特定のリアクションが付いたメッセージを指定チャンネルに転送するシステム";
@@ -45,8 +44,21 @@ export class ReactionForwarder extends BotModule {
 
   constructor(client: Client, env: Env) {
     super(client, env);
-    // 環境変数から設定を上書き
-    this.config.forwardTo = process.env.REACTION_FORWARDER_CHANNEL_ID || "";
+
+    // 環境変数から設定を構築
+    const reactionsEnv = env.REACTION_FORWARDER_REACTIONS || "";
+
+    this.config = {
+      enabled: true,
+      forwardTo: env.REACTION_FORWARDER_CHANNEL_ID || "",
+      threshold: env.REACTION_FORWARDER_THRESHOLD,
+      reactions: reactionsEnv
+        ? reactionsEnv
+            .split(",")
+            .map((id) => id.trim())
+            .filter((id) => id.length > 0)
+        : [],
+    };
   }
 
   command() {
