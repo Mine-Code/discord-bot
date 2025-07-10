@@ -116,6 +116,11 @@ export class ReactionForwarder extends BotModule {
   ) {
     if (!this.config.enabled) return;
 
+    if (!this.config.forwardTo) {
+      console.error("Forward channel not configured");
+      return;
+    }
+
     // partial reaction オブジェクトの場合は完全な情報を取得
     if (reaction.partial) {
       try {
@@ -138,8 +143,8 @@ export class ReactionForwarder extends BotModule {
       return;
     }
 
-    if (!this.config.forwardTo) {
-      console.error("Forward channel not configured");
+    // 転送先チャンネルのメッセージの場合は無視
+    if (message.channel.id === this.config.forwardTo) {
       return;
     }
 
@@ -151,11 +156,7 @@ export class ReactionForwarder extends BotModule {
       return;
     }
 
-    // リアクションのすべてのユーザーを取得 (投稿者と bot を除外)
-    const users = await reaction.users.fetch();
-    const relevantUsers = users.filter((u) => u.id !== message.author?.id && !u.bot);
-    const count = relevantUsers.size;
-
+    // 転送先チャンネルを取得
     const forwardToChannel = (await message.client.channels.fetch(
       this.config.forwardTo,
     )) as TextChannel;
@@ -164,52 +165,80 @@ export class ReactionForwarder extends BotModule {
       return;
     }
 
-    if (count >= this.config.threshold) {
-      if (alreadyForwardedMessageId) {
-        // 転送済みの場合は無視
+    // リアクションのすべてのユーザーを取得 (投稿者と bot を除外)
+    const users = await reaction.users.fetch();
+    const relevantUsers = users.filter((u) => u.id !== message.author?.id && !u.bot);
+    const count = relevantUsers.size;
+
+    // 閾値未満の場合の処理
+    if (count < this.config.threshold) {
+      // 転送済みメッセージがない場合は何もしない
+      if (!alreadyForwardedMessageId) {
         return;
       }
+      // 転送済みメッセージを削除
+      await this.deleteForwardedMessage(message.id, alreadyForwardedMessageId, forwardToChannel);
+      return;
+    }
 
-      const emojiDisplay = emoji.id ? `<:${emoji.name}:${emoji.id}>` : emoji.name || "unknown";
-      const contentMessage = `${emojiDisplay} ${count} | ${message.url}`;
+    // 既に転送済みの場合は何もしない
+    if (alreadyForwardedMessageId) {
+      return;
+    }
 
-      const embed = new EmbedBuilder()
-        .setColor(EMBED_COLOR)
-        .setTimestamp(message.createdAt)
-        .setURL(message.url)
-        .setAuthor({
-          name: message.member?.displayName ?? message.author?.username ?? EMBED_UNKNOWN_USER,
-          url: message.url,
-          iconURL: message.author?.displayAvatarURL(),
-        })
-        .setDescription(message.content?.trim() || EMBED_FALLBACK_MESSAGE);
+    // メッセージを転送
+    await this.forwardMessage(message, emoji, count, forwardToChannel);
+  }
 
-      // 画像が添付されている場合は設定
-      if (message.attachments.size > 0) {
-        const firstAttachment = message.attachments.first();
-        if (firstAttachment?.url) {
-          embed.setImage(firstAttachment.url);
-        }
+  private async forwardMessage(
+    message: any,
+    emoji: any,
+    count: number,
+    forwardToChannel: TextChannel,
+  ) {
+    const emojiDisplay = emoji.id ? `<:${emoji.name}:${emoji.id}>` : emoji.name || "unknown";
+    const contentMessage = `${emojiDisplay} ${count} | ${message.url}`;
+
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLOR)
+      .setTimestamp(message.createdAt)
+      .setURL(message.url)
+      .setAuthor({
+        name: message.member?.displayName ?? message.author?.username ?? EMBED_UNKNOWN_USER,
+        url: message.url,
+        iconURL: message.author?.displayAvatarURL(),
+      })
+      .setDescription(message.content?.trim() || EMBED_FALLBACK_MESSAGE);
+
+    // 画像が添付されている場合は設定
+    if (message.attachments.size > 0) {
+      const firstAttachment = message.attachments.first();
+      if (firstAttachment?.url) {
+        embed.setImage(firstAttachment.url);
       }
+    }
 
-      try {
-        const forwardedMessage = await forwardToChannel.send({
-          content: contentMessage,
-          embeds: [embed],
-        });
-        forwardedMessages.set(message.id, forwardedMessage.id);
-      } catch (error) {
-        console.error("Failed to forward message:", error);
-      }
-    } else {
-      if (alreadyForwardedMessageId) {
-        try {
-          await forwardToChannel.messages.delete(alreadyForwardedMessageId);
-          forwardedMessages.delete(message.id);
-        } catch (error) {
-          console.error("Failed to delete forwarded message:", error);
-        }
-      }
+    try {
+      const forwardedMessage = await forwardToChannel.send({
+        content: contentMessage,
+        embeds: [embed],
+      });
+      forwardedMessages.set(message.id, forwardedMessage.id);
+    } catch (error) {
+      console.error("Failed to forward message:", error);
+    }
+  }
+
+  private async deleteForwardedMessage(
+    messageId: string,
+    forwardedMessageId: string,
+    forwardToChannel: TextChannel,
+  ) {
+    try {
+      await forwardToChannel.messages.delete(forwardedMessageId);
+      forwardedMessages.delete(messageId);
+    } catch (error) {
+      console.error("Failed to delete forwarded message:", error);
     }
   }
 
