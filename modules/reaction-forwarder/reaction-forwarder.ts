@@ -9,6 +9,11 @@ import {
   Client,
   SlashCommandBuilder,
   MessageFlags,
+  Message,
+  PartialMessage,
+  GuildEmoji,
+  ReactionEmoji,
+  ApplicationEmoji,
 } from "discord.js";
 import { BotModule } from "../generics";
 import {
@@ -191,8 +196,8 @@ export class ReactionForwarder extends BotModule {
   }
 
   private async forwardMessage(
-    message: any,
-    emoji: any,
+    message: Message | PartialMessage,
+    emoji: GuildEmoji | ReactionEmoji | ApplicationEmoji,
     count: number,
     forwardToChannel: TextChannel,
   ) {
@@ -254,7 +259,7 @@ ${Object.entries(SUB_COMMANDS)
 - 状態: ${this.config.enabled ? "有効" : "無効"}
 - 転送先: ${this.config.forwardTo ? `<#${this.config.forwardTo}>` : "未設定"}
 - リアクションの個数: ${this.config.threshold}
-- 監視中のリアクション: ${this.config.reactions.map((id) => `<:emoji:${id}>`).join(", ") || "未設定"}
+- 監視中のリアクション: ${this.config.reactions.map((id) => `<:reaction:${id}>`).join(", ") || "未設定"}
 `.trim();
   }
 }
