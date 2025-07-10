@@ -28,6 +28,6 @@ export const EMBED_UNKNOWN_USER = "Unknown User";
 export const CONFIG: ReactionForwarderConfig = {
   enabled: true,
   forwardTo: "", // constructor で環境変数から設定される
-  threshold: 1, // 転送に必要なリアクション数
+  threshold: 3, // 転送に必要なリアクション数
   reactions: ["1183455310992638113"], // 監視するリアクション (:bad_socialcredit: のみ)
 };
