@@ -27,7 +27,7 @@ export const EMBED_UNKNOWN_USER = "Unknown User";
 // 固定設定
 export const CONFIG: ReactionForwarderConfig = {
   enabled: true,
-  forwardTo: "1392775111257489471", // 転送先チャンネルID
+  forwardTo: "1392832858145689680", // 転送先チャンネルID
   threshold: 3, // 転送に必要なリアクション数
-  reactions: ["1392815819540533400"], // 監視するリアクション（:bad_socialcredit:のみ）
+  reactions: ["1183455310992638113"], // 監視するリアクション（:bad_socialcredit:のみ）
 };
