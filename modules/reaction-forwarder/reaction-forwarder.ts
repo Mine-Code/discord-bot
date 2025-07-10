@@ -143,8 +143,11 @@ export class ReactionForwarder extends BotModule {
       return;
     }
 
-    // リアクションの数が 0 の場合はユーザーをフェッチしない
-    if (reaction.count <= 0) {
+    // 転送済みメッセージの存在確認
+    const alreadyForwardedMessageId = forwardedMessages.get(message.id);
+
+    // 転送済みでなく、リアクションがないメッセージについては処理不要
+    if (reaction.count <= 0 && !alreadyForwardedMessageId) {
       return;
     }
 
@@ -160,8 +163,6 @@ export class ReactionForwarder extends BotModule {
       console.error(`Forward channel with ID ${this.config.forwardTo} not found.`);
       return;
     }
-
-    const alreadyForwardedMessageId = forwardedMessages.get(message.id);
 
     if (count >= this.config.threshold) {
       if (alreadyForwardedMessageId) {
