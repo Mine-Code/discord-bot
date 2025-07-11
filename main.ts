@@ -1,4 +1,4 @@
-import { Client, REST, Routes } from "discord.js";
+import { Client, REST, Routes, Partials } from "discord.js";
 import * as v from "valibot";
 import * as modules from "./modules";
 import { config } from "dotenv";
@@ -8,17 +8,28 @@ const envSchema = v.object({
   BOT_ID: v.string(),
   GUILD_ID: v.string(),
   OBSERVER_CHANNEL_ID: v.string(),
+  REACTION_FORWARDER_CHANNEL_ID: v.string(),
+  REACTION_FORWARDER_REACTIONS: v.string(),
+  REACTION_FORWARDER_THRESHOLD: v.pipe(v.string(), v.transform(Number), v.integer()),
 });
 
 config();
 
-export type Env = v.InferInput<typeof envSchema>;
+export type Env = v.InferOutput<typeof envSchema>;
 
 const env = v.parse(envSchema, process.env);
 process.env.TZ = "Asia/Tokyo";
 
 const client = new Client({
-  intents: ["Guilds", "GuildVoiceStates", "GuildMessages", "GuildMembers", "MessageContent"],
+  intents: [
+    "Guilds",
+    "GuildVoiceStates",
+    "GuildMessages",
+    "GuildMembers",
+    "MessageContent",
+    "GuildMessageReactions",
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 client.once("ready", () => {
